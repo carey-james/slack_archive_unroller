@@ -4,6 +4,8 @@ from glob import glob
 from pathlib import Path
 from datetime import datetime
 
+
+# Used for loading the `users.json` file into a dictonary, so we can replace user ID's with names
 def grab_users(root_dir):
 	users = {}
 	with open(str(root_dir / 'users.json')) as user_file:
@@ -15,10 +17,13 @@ def grab_users(root_dir):
 				users[user['id']] = user['profile']['real_name_normalized']
 	return users
 
+# Looks up a user ID in the dictonary and returns the name
 def user_lookup(match_obj, users):
 	if match_obj.group(1) is not None:
 		return f'`{users[match_obj.group(1)]}`'
 
+# Takes each JSON file in a channel and turns it into a text list of messages, with the format:
+# Name Timestamp : Message Text
 def json_to_text(json_file_path, users):
 	messages = ''
 	with open(json_file_path) as day_file:
@@ -38,6 +43,9 @@ def json_to_text(json_file_path, users):
 				messages = f'{messages}**{name}** *{timestamp}* **:** {text}\n\n'
 	return messages
 
+# Main method, asks for inputs, runs the grab_users() to create the user lookup dic, runs through
+# each dir in the root folder as a channel, extracting all the daily text using json_to_text(), then
+# outputs it all as a md file.
 def main():
 	slack_name = input('Slack name: ')
 	root_dir = Path(input('Path to archive: '))
